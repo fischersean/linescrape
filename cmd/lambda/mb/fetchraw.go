@@ -15,6 +15,7 @@ import (
 	"github.com/gocolly/colly"
 
 	"github.com/fischersean/linescrape/pkg/mybookie"
+	"github.com/fischersean/linescrape/pkg/game"
 )
 
 type Request struct {
@@ -23,7 +24,7 @@ type Request struct {
 
 type Resonse struct {
 	TimeStamp time.Time           `json:"time_stamp"`
-	Odds      []mybookie.GameLine `json:"odds"`
+	Odds      []game.Line `json:"odds"`
 	League    string              `json:"league"`
 }
 
@@ -55,6 +56,7 @@ func putResponsDB(res Resonse) (err error) {
 }
 
 func Handler(request Request) (Resonse, error) {
+	// TODO: Need to abstract away the calls to colly in this function
 
 	log.Printf("%+v", request)
 
@@ -64,7 +66,7 @@ func Handler(request Request) (Resonse, error) {
 
 	siteUrl := fmt.Sprintf("https://mybookie.ag/sportsbook/%s/", request.League)
 
-	var odds []mybookie.GameLine
+	var odds []game.Line
 
 	c := colly.NewCollector()
 

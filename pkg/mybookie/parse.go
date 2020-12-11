@@ -3,6 +3,7 @@ package mybookie
 import (
 	"errors"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/fischersean/linescrape/pkg/game"
 	"github.com/gocolly/colly"
 	"strconv"
 )
@@ -34,21 +35,21 @@ type tagData struct {
 	Odds   int64
 }
 
-// GameLine is the basic data structure used within betting
-type GameLine struct {
-	GameTime             string
-	HomeTeam             string
-	VisitingTeam         string
-	HomeSpreadPoints     float64
-	VisitingSpreadPoints float64
-	HomeSpreadLine       int64
-	VisitingSpreadLine   int64
-	HomeMoneyLine        int64
-	VisitingMoneyLine    int64
-	GameOver             float64
-	GameOverLine         int64
-	GameUnderLine        int64
-}
+// Line is the basic data structure used within betting
+//type Line struct {
+//GameTime             string
+//HomeTeam             string
+//VisitingTeam         string
+//HomeSpreadPoints     float64
+//VisitingSpreadPoints float64
+//HomeSpreadLine       int64
+//VisitingSpreadLine   int64
+//HomeMoneyLine        int64
+//VisitingMoneyLine    int64
+//GameOver             float64
+//GameOverLine         int64
+//GameUnderLine        int64
+//}
 
 func parseTags(dom *goquery.Selection, selector string) (t tagData, err error) {
 
@@ -101,7 +102,7 @@ func parseSpread(dom *goquery.Selection) (s spread, err error) {
 	return s, err
 }
 
-func parseGameSpread(homeDOM *goquery.Selection, visitingDOM *goquery.Selection, odds *GameLine) (err error) {
+func parseGameSpread(homeDOM *goquery.Selection, visitingDOM *goquery.Selection, odds *game.Line) (err error) {
 
 	vSpread, err := parseSpread(visitingDOM)
 
@@ -138,7 +139,7 @@ func parseMoneyLine(dom *goquery.Selection) (m moneyLine, err error) {
 	return m, err
 }
 
-func parseGameMoneyLine(homeDOM *goquery.Selection, visitingDOM *goquery.Selection, odds *GameLine) (err error) {
+func parseGameMoneyLine(homeDOM *goquery.Selection, visitingDOM *goquery.Selection, odds *game.Line) (err error) {
 
 	vSpread, err := parseMoneyLine(visitingDOM)
 
@@ -158,7 +159,7 @@ func parseGameMoneyLine(homeDOM *goquery.Selection, visitingDOM *goquery.Selecti
 	return err
 }
 
-func parseGameOver(homeDOM *goquery.Selection, visitingDOM *goquery.Selection, odds *GameLine) (err error) {
+func parseGameOver(homeDOM *goquery.Selection, visitingDOM *goquery.Selection, odds *game.Line) (err error) {
 
 	th, err := parseTags(homeDOM, "[data-wager-type='to']")
 
@@ -180,7 +181,7 @@ func parseGameOver(homeDOM *goquery.Selection, visitingDOM *goquery.Selection, o
 }
 
 // ParseOdds parses a HTML doc pulled from mybookie's nfl page and return a slice of odds
-func ParseOdds(e *colly.HTMLElement) (odds GameLine, err error) {
+func ParseOdds(e *colly.HTMLElement) (odds game.Line, err error) {
 
 	// Find game date
 	var exists bool

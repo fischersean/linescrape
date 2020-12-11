@@ -11,6 +11,7 @@ import (
 	"github.com/gocarina/gocsv"
 
 	"github.com/fischersean/linescrape/pkg/fte"
+	"github.com/fischersean/linescrape/pkg/game"
 
 	"encoding/csv"
 	"fmt"
@@ -20,23 +21,6 @@ import (
 	"strings"
 	"time"
 )
-
-type ProjectionItem struct {
-	GameId                 string    `json:"-"`
-	League                 string    `json:":league"`
-	Source                 string    `json:":source"`
-	HomeWinProbability     float64   `json:":homeWinProb"`
-	VisitingWinProbability float64   `json:":visitingWinProb"`
-	Home                   string    `json:":home"`
-	Visiting               string    `json:":visiting"`
-	GameDate               time.Time `json:":gameDate"`
-	Season                 int       `json:":season"`
-	Playoff                string    `json:":playoff"`
-}
-
-type Resonse struct {
-	Ok bool
-}
 
 func marshalProjections(r io.Reader) (p []fte.EloProjection, err error) {
 
@@ -68,7 +52,7 @@ func refreshProjDynamo(sess *session.Session, f io.Reader) (err error) {
 		return t
 	}
 
-	shouldUpdate := func(v ProjectionItem) bool {
+	shouldUpdate := func(v game.Projection) bool {
 
 		yesterday := func(t time.Time) bool {
 			s := time.Since(t)
@@ -93,7 +77,7 @@ func refreshProjDynamo(sess *session.Session, f io.Reader) (err error) {
 		return yesterday || withinSixDays
 	}
 
-	var projs []ProjectionItem
+	var projs []game.Projection
 
 	proj, err := marshalProjections(f)
 
@@ -102,10 +86,10 @@ func refreshProjDynamo(sess *session.Session, f io.Reader) (err error) {
 	}
 
 	for _, v := range proj {
-		p := ProjectionItem{
+		p := game.Projection{
 			GameId:                 getGameId(v),
 			League:                 "NFL",
-			Source:                 "FTEQQELO",
+			Source:                 "FTEQBELO",
 			Home:                   v.Team1,
 			Visiting:               v.Team2,
 			HomeWinProbability:     v.QBEloProb1,
@@ -131,37 +115,38 @@ func refreshProjDynamo(sess *session.Session, f io.Reader) (err error) {
 			return err
 		}
 
-		input := &dynamodb.UpdateItemInput{
-			ExpressionAttributeNames: map[string]*string{
-				"#H":   aws.String("home"),
-				"#V":   aws.String("visiting"),
-				"#HWP": aws.String("homeWinProb"),
-				"#VWP": aws.String("visitingWinProb"),
-				"#SC":  aws.String("source"),
-				"#GD":  aws.String("gameDate"),
-				"#LG":  aws.String("league"),
-				"#S":   aws.String("season"),
-				"#PO":  aws.String("playoff"),
-			},
-			ExpressionAttributeValues: av,
-			Key: map[string]*dynamodb.AttributeValue{
-				"gameId": {
-					S: aws.String(v.GameId),
-				},
-			},
+		input := &dynamodb.PutItemInput{
+			//ExpressionAttributeNames: map[string]*string{
+			//"#H":   aws.String("home"),
+			//"#V":   aws.String("visiting"),
+			//"#HWP": aws.String("homeWinProb"),
+			//"#VWP": aws.String("visitingWinProb"),
+			//"#SC":  aws.String("source"),
+			//"#GD":  aws.String("gameDate"),
+			//"#LG":  aws.String("league"),
+			//"#S":   aws.String("season"),
+			//"#PO":  aws.String("playoff"),
+			//},
+			//ExpressionAttributeValues: av,
+			//Key: map[string]*dynamodb.AttributeValue{
+			//"gameId": {
+			//S: aws.String(v.GameId),
+			//},
+			//},
+			Item:      av,
 			TableName: aws.String("win-projections"),
-			UpdateExpression: aws.String(`SET #H = :home, 
-											#V = :visiting,
-											#HWP = :homeWinProb,
-											#VWP = :visitingWinProb,
-											#SC = :source,
-											#LG = :league,
-											#GD = :gameDate,
-											#S = :season,
-											#PO = :playoff`),
+			//UpdateExpression: aws.String(`SET #H = :home,
+			//#V = :visiting,
+			//#HWP = :homeWinProb,
+			//#VWP = :visitingWinProb,
+			//#SC = :source,
+			//#LG = :league,
+			//#GD = :gameDate,
+			//#S = :season,
+			//#PO = :playoff`),
 		}
 
-		_, err = svc.UpdateItem(input)
+		_, err = svc.PutItem(input)
 		if err != nil {
 			return err
 		}
@@ -186,15 +171,13 @@ func refreshEloS3(sess *session.Session, f io.Reader) (err error) {
 
 }
 
-func Handler() (Resonse, error) {
+func Handler() error {
 
 	url := "https://projects.fivethirtyeight.com/nfl-api/nfl_elo_latest.csv"
 
 	res, err := http.Get(url)
 	if err != nil {
-		return Resonse{
-			Ok: false,
-		}, err
+		return err
 	}
 
 	defer res.Body.Close()
@@ -204,31 +187,22 @@ func Handler() (Resonse, error) {
 	)
 
 	if err != nil {
-		return Resonse{
-			Ok: false,
-		}, err
+		return err
 	}
 
 	err = refreshProjDynamo(sess, res.Body)
 	if err != nil {
-		return Resonse{
-			Ok: false,
-		}, err
+		return err
 	}
 
 	err = refreshEloS3(sess, res.Body)
-	if err != nil {
-		return Resonse{
-			Ok: false,
-		}, err
-	}
 
-	return Resonse{
-		Ok: true,
-	}, err
+	return err
+
 }
+
 func main() {
-	//_, err := Handler()
+	//err := Handler()
 	//log.Printf("%#v", err)
 	lambda.Start(Handler)
 }

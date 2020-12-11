@@ -1,5 +1,10 @@
 package fte
 
+import (
+	"fmt"
+	"strings"
+)
+
 type EloProjection struct {
 	Date         string  `csv:"date"`
 	Season       int     `csv:"season"`
@@ -31,4 +36,13 @@ type EloProjection struct {
 	QBEloPost2   float64 `csv:"qbelo2_post"`
 	Score1       float64 `csv:"score1"`
 	Score2       float64 `csv:"score2"`
+}
+
+func GenGameID(p EloProjection) string {
+	parts := strings.Split(p.Date, "-")
+	return fmt.Sprintf("%s%s%s%s%s%s",
+		"NFL",
+		parts[0], parts[1], parts[2],
+		p.Team1, p.Team2,
+	)
 }
