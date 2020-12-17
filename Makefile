@@ -2,13 +2,13 @@
 
 bundle:
 	#rm lambda-bundles/$(subdir)/$(func).zip
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o lambda-bundles/$(subdir)/$(func) cmd/lambda/$(subdir)/$(func).go
-	cd lambda-bundles/$(subdir) && \
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o lambda-bundles/$(func) cmd/lambda/$(func)/main.go
+	cd lambda-bundles && \
 		zip -X $(func).zip  $(func) && \
 		rm $(func)
 
 run:
-	go run cmd/$(subdir)/$(exe).go
+	go run cmd/lambda/$(func)/main.go
 
 test:
 	@make lint && go test -v -coverprofile cp.out ./...

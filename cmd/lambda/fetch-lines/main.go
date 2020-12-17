@@ -14,8 +14,8 @@ import (
 
 	"github.com/gocolly/colly"
 
-	"github.com/fischersean/linescrape/pkg/mybookie"
 	"github.com/fischersean/linescrape/pkg/game"
+	"github.com/fischersean/linescrape/pkg/mybookie"
 )
 
 type Request struct {
@@ -23,9 +23,9 @@ type Request struct {
 }
 
 type Resonse struct {
-	TimeStamp time.Time           `json:"time_stamp"`
+	TimeStamp time.Time   `json:"time_stamp"`
 	Odds      []game.Line `json:"odds"`
-	League    string              `json:"league"`
+	League    string      `json:"league"`
 }
 
 func putResponsDB(res Resonse) (err error) {

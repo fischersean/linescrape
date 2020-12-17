@@ -14,9 +14,9 @@ import (
 
 	"errors"
 	"fmt"
+	"time"
 	//"log"
 	//"os"
-	"time"
 )
 
 type LineProjectionResult struct {
@@ -120,8 +120,15 @@ func fetchProjection(svc *dynamodb.DynamoDB, odds game.Line) (p game.Projection,
 			":v1": {
 				S: aws.String(gid),
 			},
+			":v2": {
+				S: aws.String("FTEQQELO"),
+			},
+		},
+		ExpressionAttributeNames: map[string]*string{
+			"#S": aws.String("source"),
 		},
 		KeyConditionExpression: aws.String("gameId = :v1"),
+		FilterExpression:       aws.String("#S = :v2"),
 		TableName:              aws.String(tableName),
 		Limit:                  aws.Int64(1),
 	}
