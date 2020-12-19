@@ -12,12 +12,20 @@ import (
 
 	//"github.com/gocarina/gocsv"
 
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 	//"log"
 	//"os"
 )
+
+type Response struct {
+	Body       string            `json:"body"`
+	StatusCode int               `json:"statusCode"`
+	Headers    map[string]string `json:"headers"`
+}
 
 type LineProjectionResult struct {
 	Home                   string
@@ -27,6 +35,30 @@ type LineProjectionResult struct {
 	HomeWinProbability     float64
 	VisitingWinProbability float64
 	GameTime               string
+}
+
+func Handler() (Response, error) {
+
+	lpr, err := generateExport()
+	if err != nil {
+		return Response{StatusCode: 504}, err
+	}
+
+	body, err := json.Marshal(lpr)
+	if err != nil {
+		return Response{StatusCode: 504}, err
+	}
+
+	var buf bytes.Buffer
+	json.HTMLEscape(&buf, body)
+
+	return Response{
+		StatusCode: 200,
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin": "*",
+		},
+		Body: buf.String(),
+	}, err
 }
 
 func generateExport() (lpr []LineProjectionResult, err error) {
@@ -121,7 +153,7 @@ func fetchProjection(svc *dynamodb.DynamoDB, odds game.Line) (p game.Projection,
 				S: aws.String(gid),
 			},
 			":v2": {
-				S: aws.String("FTEQQELO"),
+				S: aws.String("FTEQBELO"),
 			},
 		},
 		ExpressionAttributeNames: map[string]*string{
@@ -151,16 +183,6 @@ func fetchProjection(svc *dynamodb.DynamoDB, odds game.Line) (p game.Projection,
 
 func main() {
 
-	//p, err := generateExport()
-
-	//if err != nil {
-	//log.Fatalf(err.Error())
-	//}
-
-	//if err = gocsv.MarshalFile(p, os.Stdout); err != nil {
-	//log.Fatalf(err.Error())
-	//}
-
-	lambda.Start(generateExport)
+	lambda.Start(Handler)
 
 }

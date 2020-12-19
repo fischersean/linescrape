@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  linescrape
+
+  Collect and compile data related to sports line odds and win projections
+
+Globals:
+  Function:
+    Timeout: 5
+
+Resources:
+  FetchLinesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cmd/lambda/fetch-lines
+      Handler: fetch-lines
+      Runtime: go1.x
+      Tracing: Active
+      Policies: arn:aws:iam::261392311630:policy/DynamoDBReadWriteGameOdds
+      Events:
+        EachHourCFB:
+          Type: Schedule
+          Properties:
+            Enabled: False
+            Schedule: 'rate(1 hour)'
+            Input: '{"League":"cfb"}'
+        EachHourNFL:
+          Type: Schedule
+          Properties:
+            Enabled: False
+            Schedule: 'rate(1 hour)'
+            Input: '{"League":"nfl"}'
+
+  UpdateNFLEloFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cmd/lambda/update-nfl-elo
+      Handler: update-nfl-elo
+      Runtime: go1.x
+      Tracing: Active
+      Policies:
+        - arn:aws:iam::261392311630:policy/S3GameOddsWriteOnly
+        - arn:aws:iam::261392311630:policy/DynamoWriteWinProjections
+      Events:
+        EachMorning:
+          Type: Schedule
+          Properties:
+            Enabled: False
+            Schedule: 'cron(0 10 * * ? *)'
+
+  CompileExportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cmd/lambda/compile-export
+      Handler: compile-export
+      Runtime: go1.x
+      Tracing: Active
+      Policies: arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /game-lines
+            Method: get
+            RestApiId:
+              Ref: APIEndpoint
+
+  APIEndpoint:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: v0
+
+
+Outputs:
+  FetchLinesFunction:
+    Description: "Scrape the betting lines and store in dynamo table"
+    Value: !GetAtt FetchLinesFunction.Arn
+  FetchLinesFuctionIamRole:
+    Description: "Implicit IAM Role created for fetch lines function"
+    Value: !GetAtt FetchLinesFunctionRole.Arn
+
+  UpdateNFLEloFunction:
+    Description: "Pull latest 538 NFL ELO data and store them in S3/Dynamo"
+    Value: !GetAtt UpdateNFLEloFunction.Arn
+  UpdateNFLEloFuctionIamRole:
+    Description: "Implicit IAM Role created for update NFL ELO function"
+    Value: !GetAtt UpdateNFLEloFunctionRole.Arn
+
+  CompileExportFunction:
+    Description: "Compile odds-win% export and return via api"
+    Value: !GetAtt CompileExportFunction.Arn
+  CompileExportFunctionRole:
+    Description: "Implicit IAM Role created for compile export function"
+    Value: !GetAtt CompileExportFunctionRole.Arn

@@ -21,3 +21,9 @@ fmt:
 
 lint:
 	golangci-lint run
+
+build:
+	sam build
+
+deploy:
+	sam deploy

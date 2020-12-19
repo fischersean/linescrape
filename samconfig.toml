@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "LineScrape"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1a5ypx7ymvt9j"
+s3_prefix = "LineScrape"
+region = "us-east-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
