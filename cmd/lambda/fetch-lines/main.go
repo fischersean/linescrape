@@ -25,6 +25,7 @@ type Request struct {
 type Resonse struct {
 	TimeStamp time.Time   `json:"time_stamp"`
 	Odds      []game.Line `json:"odds"`
+	Source    string      `json:"source"`
 	League    string      `json:"league"`
 }
 
@@ -88,6 +89,7 @@ func Handler(request Request) (Resonse, error) {
 		Odds:      odds,
 		TimeStamp: time.Now(),
 		League:    request.League,
+		Source:    "mybookie",
 	}
 
 	if err = putResponsDB(res); err != nil {

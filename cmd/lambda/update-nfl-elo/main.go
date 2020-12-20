@@ -64,16 +64,6 @@ func refreshProjDynamo(sess *session.Session, f io.Reader) (err error) {
 			return u <= 6*24*time.Hour && u > 0
 		}(v.GameDate)
 
-		//if yesterday || withinSixDays {
-		//log.Printf("Updating game on %s", v.GameDate)
-		//if yesterday {
-		//log.Printf("Is yesterday")
-		//}
-		//if withinSixDays {
-		//log.Println("Is within +6 days")
-		//}
-		//}
-
 		return yesterday || withinSixDays
 	}
 
@@ -116,34 +106,8 @@ func refreshProjDynamo(sess *session.Session, f io.Reader) (err error) {
 		}
 
 		input := &dynamodb.PutItemInput{
-			//ExpressionAttributeNames: map[string]*string{
-			//"#H":   aws.String("home"),
-			//"#V":   aws.String("visiting"),
-			//"#HWP": aws.String("homeWinProb"),
-			//"#VWP": aws.String("visitingWinProb"),
-			//"#SC":  aws.String("source"),
-			//"#GD":  aws.String("gameDate"),
-			//"#LG":  aws.String("league"),
-			//"#S":   aws.String("season"),
-			//"#PO":  aws.String("playoff"),
-			//},
-			//ExpressionAttributeValues: av,
-			//Key: map[string]*dynamodb.AttributeValue{
-			//"gameId": {
-			//S: aws.String(v.GameId),
-			//},
-			//},
 			Item:      av,
 			TableName: aws.String("win-projections"),
-			//UpdateExpression: aws.String(`SET #H = :home,
-			//#V = :visiting,
-			//#HWP = :homeWinProb,
-			//#VWP = :visitingWinProb,
-			//#SC = :source,
-			//#LG = :league,
-			//#GD = :gameDate,
-			//#S = :season,
-			//#PO = :playoff`),
 		}
 
 		_, err = svc.PutItem(input)

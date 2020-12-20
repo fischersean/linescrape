@@ -21,35 +21,12 @@ type moneyLine struct {
 	Line   int64
 }
 
-//type total struct {
-//Team   string
-//VsTeam string
-//Points float64
-//Line   int64
-//}
-
 type tagData struct {
 	Team   string
 	VsTeam string
 	Spread float64
 	Odds   int64
 }
-
-// Line is the basic data structure used within betting
-//type Line struct {
-//GameTime             string
-//HomeTeam             string
-//VisitingTeam         string
-//HomeSpreadPoints     float64
-//VisitingSpreadPoints float64
-//HomeSpreadLine       int64
-//VisitingSpreadLine   int64
-//HomeMoneyLine        int64
-//VisitingMoneyLine    int64
-//GameOver             float64
-//GameOverLine         int64
-//GameUnderLine        int64
-//}
 
 func parseTags(dom *goquery.Selection, selector string) (t tagData, err error) {
 

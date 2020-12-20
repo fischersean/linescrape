@@ -10,14 +10,12 @@ import (
 	//"github.com/fischersean/linescrape/pkg/fte"
 	"github.com/fischersean/linescrape/pkg/game"
 
-	//"github.com/gocarina/gocsv"
-
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
-	//"log"
 	//"os"
 )
 
@@ -75,9 +73,10 @@ func generateExport() (lpr []LineProjectionResult, err error) {
 		return lpr, err
 	}
 
+	log.Println("#v", odds)
 	for _, v := range odds {
 		proj, err := fetchProjection(svc, v)
-		if err != nil {
+		if err != nil && err.Error() != "Could not find item matching query expression" {
 			return lpr, err
 		}
 
@@ -130,7 +129,7 @@ func getLatestNflOdds(svc *dynamodb.DynamoDB) (odds []game.Line, err error) {
 
 func fetchProjection(svc *dynamodb.DynamoDB, odds game.Line) (p game.Projection, err error) {
 
-	gameDate, err := time.Parse("2006-01-02 15:04:05.999999999", odds.GameTime)
+	gameDate, err := time.Parse("2006-01-02 15:04:05", odds.GameTime)
 
 	if err != nil {
 		return p, err
@@ -143,8 +142,7 @@ func fetchProjection(svc *dynamodb.DynamoDB, odds game.Line) (p game.Projection,
 		game.CommonToFte[odds.VisitingTeam],
 	)
 
-	//log.Printf("%s", gid)
-
+	log.Printf("%s", gid)
 	tableName := "win-projections"
 
 	input := &dynamodb.QueryInput{
@@ -172,6 +170,7 @@ func fetchProjection(svc *dynamodb.DynamoDB, odds game.Line) (p game.Projection,
 	}
 
 	if *result.Count != 1 {
+		log.Printf("Error finding projections for %s", gid)
 		return p, errors.New("Could not find item matching query expression")
 	}
 

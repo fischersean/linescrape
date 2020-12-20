@@ -24,7 +24,7 @@ Resources:
           Properties:
             Enabled: False
             Schedule: 'rate(1 hour)'
-            Input: '{"League":"cfb"}'
+            Input: '{"League":"college-football"}'
         EachHourNFL:
           Type: Schedule
           Properties:
