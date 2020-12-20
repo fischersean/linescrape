@@ -71,6 +71,52 @@ Resources:
     Properties:
       StageName: v0
 
+  GameOddsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: game-odds
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        -
+          AttributeName: league
+          AttributeType: S
+        -
+          AttributeName: time_stamp
+          AttributeType: S
+      KeySchema:
+        -
+          AttributeName: league
+          KeyType: HASH
+        -
+          AttributeName: time_stamp
+          KeyType: RANGE
+
+  WinProjectionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: win-projections
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        -
+          AttributeName: gameId
+          AttributeType: S
+        -
+          AttributeName: source
+          AttributeType: S
+      KeySchema:
+        -
+          AttributeName: gameId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        -
+          IndexName: source
+          KeySchema:
+            -
+              AttributeName: source
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
 
 Outputs:
   FetchLinesFunction:
