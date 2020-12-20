@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
-	//"github.com/fischersean/linescrape/pkg/fte"
+	"github.com/fischersean/linescrape/pkg/fte"
 	"github.com/fischersean/linescrape/pkg/game"
 
 	"bytes"
@@ -138,8 +138,8 @@ func fetchProjection(svc *dynamodb.DynamoDB, odds game.Line) (p game.Projection,
 	gid := fmt.Sprintf("%s%s%s%s",
 		"NFL",
 		gameDate.Format("20060102"),
-		game.CommonToFte[odds.HomeTeam],
-		game.CommonToFte[odds.VisitingTeam],
+		fte.FromCommon[odds.HomeTeam],
+		fte.FromCommon[odds.VisitingTeam],
 	)
 
 	log.Printf("%s", gid)
