@@ -22,13 +22,13 @@ Resources:
         EachHourCFB:
           Type: Schedule
           Properties:
-            Enabled: False
+            Enabled: True
             Schedule: 'rate(1 hour)'
             Input: '{"League":"college-football"}'
         EachHourNFL:
           Type: Schedule
           Properties:
-            Enabled: False
+            Enabled: True
             Schedule: 'rate(1 hour)'
             Input: '{"League":"nfl"}'
 
@@ -46,7 +46,7 @@ Resources:
         EachMorning:
           Type: Schedule
           Properties:
-            Enabled: False
+            Enabled: True
             Schedule: 'cron(0 10 * * ? *)'
 
   CompileExportFunction:
