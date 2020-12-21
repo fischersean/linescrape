@@ -29,9 +29,3 @@ type Line struct {
 	GameOverLine         int64
 	GameUnderLine        int64
 }
-
-type GameOddsTableItem struct {
-	TimeStamp time.Time `json:"time_stamp"`
-	League    string    `json:"league"`
-	Odds      []Line    `json:"odds"`
-}
