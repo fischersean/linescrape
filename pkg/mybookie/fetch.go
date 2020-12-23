@@ -29,7 +29,7 @@ func FetchLines(league string) ([]game.Line, error) {
 		"NFL":                "nfl",
 		"NBA":                "nba",
 		"college-football":   "college-football",
-		"college-basketball": "ncaa-baseketball",
+		"college-basketball": "ncaa-basketball",
 	}
 
 	cleanName, ok := requestNames[league]
