@@ -19,18 +19,56 @@ Resources:
       Tracing: Active
       Policies: arn:aws:iam::261392311630:policy/DynamoDBReadWriteGameOdds
       Events:
-        EachHourCFB:
+        # BASKETBALL -----------------------------------------------
+        MybookieNCAAB:
           Type: Schedule
           Properties:
             Enabled: True
-            Schedule: 'rate(1 hour)'
-            Input: '{"League":"college-football"}'
-        EachHourNFL:
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "mybookie", "League":"college-basketball"}'
+        MybookieNBA:
           Type: Schedule
           Properties:
             Enabled: True
-            Schedule: 'rate(1 hour)'
-            Input: '{"League":"nfl"}'
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "mybookie", "League":"NBA"}'
+        CaesarsNCAAB:
+          Type: Schedule
+          Properties:
+            Enabled: True
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "caesars", "League":"college-basketball"}'
+        CaesarsNBA:
+          Type: Schedule
+          Properties:
+            Enabled: True
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "caesars", "League":"NBA"}'
+        # FOOTBALL -----------------------------------------------
+        MybookieCFB:
+          Type: Schedule
+          Properties:
+            Enabled: True
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "mybookie", "League":"college-football"}'
+        MybookieNFL:
+          Type: Schedule
+          Properties:
+            Enabled: True
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "mybookie", "League":"NFL"}'
+        CaesarsCFB:
+          Type: Schedule
+          Properties:
+            Enabled: True
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "caesars", "League":"college-football"}'
+        CaesarsNFL:
+          Type: Schedule
+          Properties:
+            Enabled: True
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "caesars", "League":"NFL"}'
 
   UpdateNFLEloFunction:
     Type: AWS::Serverless::Function
