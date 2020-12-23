@@ -8,22 +8,22 @@ bundle:
 		rm $(func)
 
 run:
-	go run cmd/lambda/$(func)/main.go
+	@go run cmd/lambda/$(func)/main.go
 
 test:
 	@make lint && go test -v -coverprofile cp.out ./...
 
 showcover:
-	go tool cover -html=cp.out
+	@go tool cover -html=cp.out
 	
 fmt:
-	gofmt -s -w .
+	@gofmt -s -w .
 
 lint:
-	golangci-lint run
+	@golangci-lint run
 
 build:
-	sam build
+	@sam build
 
 deploy:
-	sam deploy
+	@sam deploy

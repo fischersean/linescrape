@@ -1,3 +1,4 @@
+scripts/
 .aws-sam/
 lambda-bundles/
 tmp/

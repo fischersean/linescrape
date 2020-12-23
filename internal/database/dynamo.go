@@ -11,7 +11,8 @@ import (
 
 	"errors"
 	"fmt"
-	"log"
+	//"log"
+	"strings"
 	"time"
 )
 
@@ -39,6 +40,50 @@ func Init() {
 	}))
 
 	Service = dynamodb.New(Session)
+
+}
+
+// FetchLatestNflOdds returns the most recently added set of game odds
+func FetchLatestOdds(dataSource string, league string) ([]game.Line, error) {
+
+	var odds []game.Line
+
+	tableName := "game-odds"
+
+	input := &dynamodb.QueryInput{
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":v1": {
+				S: aws.String(league),
+			},
+			":v2": {
+				S: aws.String(dataSource),
+			},
+		},
+		ExpressionAttributeNames: map[string]*string{
+			"#L": aws.String("league"),
+			"#S": aws.String("source"),
+		},
+		KeyConditionExpression: aws.String("#L = :v1"),
+		FilterExpression:       aws.String("#S = :v2"),
+		TableName:              aws.String(tableName),
+		ScanIndexForward:       aws.Bool(false),
+		Limit:                  aws.Int64(2), // Will alwways be within n * # of sources of top
+	}
+
+	result, err := Service.Query(input)
+
+	if err != nil {
+		return odds, err
+	}
+
+	if *result.Count != 1 {
+		return odds, errors.New("Could not find item matching query expression")
+	}
+
+	item := []GameOddsItem{}
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &item)
+
+	return item[0].Odds, err
 
 }
 
@@ -92,9 +137,15 @@ func FetchProjection(odds game.Line, projectionSource string) (game.Projection, 
 	var p game.Projection
 
 	gameDate, err := time.Parse("2006-01-02 15:04:05", odds.GameTime)
-
 	if err != nil {
-		return p, err
+		// Try the caesars format
+		parts := strings.Split(odds.GameTime, " ")
+		gameDate, err = time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s %s", parts[0], parts[1]))
+
+		if err != nil {
+			return p, err
+
+		}
 	}
 
 	var nameMap map[string]string
@@ -166,7 +217,7 @@ func PutGameOddsItem(odds GameOddsItem) error {
 		TableName: aws.String(tableName),
 	}
 
-	log.Printf("%#v", odds)
+	//log.Printf("%#v", odds)
 	_, err = Service.PutItem(input)
 
 	return err
