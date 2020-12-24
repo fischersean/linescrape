@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 
 	"github.com/fischersean/linescrape/internal/database"
@@ -70,31 +71,36 @@ func validateRequest(r Request) error {
 	return nil
 }
 
-func Handler(request Request) (Response, error) {
+func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
+	// we are relying on API gateway to guarantee these are present
+	r := Request{}
+	r.League = request.QueryStringParameters["league"]
+	r.Source = request.QueryStringParameters["source"]
+	r.Projection = request.QueryStringParameters["projection"]
 	// If no param provided, default to none
-	if request.Projection == "" {
-		request.Projection = "none"
+	if r.Projection == "" {
+		r.Projection = "none"
 	}
 
-	if err := validateRequest(request); err != nil {
-		return Response{StatusCode: 400}, err
+	if err := validateRequest(r); err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400}, err
 	}
 
-	lpr, err := generateExport(request.League, request.Source, request.Projection)
+	lpr, err := generateExport(r.League, r.Source, r.Projection)
 	if err != nil {
-		return Response{StatusCode: 500}, err
+		return events.APIGatewayProxyResponse{StatusCode: 500}, err
 	}
 
 	body, err := json.Marshal(lpr)
 	if err != nil {
-		return Response{StatusCode: 500}, err
+		return events.APIGatewayProxyResponse{StatusCode: 500}, err
 	}
 
 	var buf bytes.Buffer
 	json.HTMLEscape(&buf, body)
 
-	return Response{
+	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Headers: map[string]string{
 			"Access-Control-Allow-Origin": "*",

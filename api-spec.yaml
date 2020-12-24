@@ -1,0 +1,45 @@
+openapi: "3.0.1"
+info:
+  title: "LineScrape"
+  version: "1.0"
+servers:
+- url: "https://api.seanfischer.io/{basePath}"
+  variables:
+    basePath:
+      default: "/v0"
+paths:
+  /game-lines:
+    get:
+      parameters:
+      - name: "projection"
+        in: "query"
+        description: "The source of win projections. Currently only 538's NFL ELO\
+          \ system is supported (FTEQBELO)"
+        schema:
+          type: "string"
+      - name: "league"
+        in: "query"
+        description: "The sport league to pull lines for. Currently there are 4 leagues\
+          \ supported, NFL, NBA, college-football, and college-basketball."
+        required: true
+        schema:
+          type: "string"
+      - name: "source"
+        in: "query"
+        description: "The sports book to pull lines from. mybookie.ag (mybookie) and\
+          \ Caesars (caesars) are supported."
+        required: true
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "200 response"
+          content: {}
+      security:
+      - api_key: []
+components:
+  securitySchemes:
+    api_key:
+      type: "apiKey"
+      name: "x-api-key"
+      in: "header"
