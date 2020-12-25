@@ -1,0 +1,11 @@
+{
+    "QueryStringParameters": {
+        "source": "FTEQBELO"
+    },
+    "MultiValueQueryStringParameters": {
+        "gameDate": [
+             "2020-12-27T00:00:00Z",
+             "2020-12-26T00:00:00Z"
+        ]
+    }
+}

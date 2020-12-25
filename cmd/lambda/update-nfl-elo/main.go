@@ -4,12 +4,11 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
 	"github.com/gocarina/gocsv"
 
+	"github.com/fischersean/linescrape/internal/database"
 	"github.com/fischersean/linescrape/pkg/fte"
 	"github.com/fischersean/linescrape/pkg/game"
 
@@ -30,7 +29,7 @@ func marshalProjections(r io.Reader) (p []fte.EloProjection, err error) {
 	return p, err
 }
 
-func refreshProjDynamo(sess *session.Session, f io.Reader) (err error) {
+func refreshProjDynamo(f io.Reader) (err error) {
 
 	getGameId := func(p fte.EloProjection) string {
 		parts := strings.Split(p.Date, "-")
@@ -94,26 +93,18 @@ func refreshProjDynamo(sess *session.Session, f io.Reader) (err error) {
 
 	//projs = projs[0:20]
 
-	svc := dynamodb.New(sess)
 	for _, v := range projs {
+
 		if !shouldUpdate(v) {
 			continue
 		}
 
-		av, err := dynamodbattribute.MarshalMap(v)
+		database.Init()
+		err = database.PutGameProjection(v)
 		if err != nil {
 			return err
 		}
 
-		input := &dynamodb.PutItemInput{
-			Item:      av,
-			TableName: aws.String("win-projections"),
-		}
-
-		_, err = svc.PutItem(input)
-		if err != nil {
-			return err
-		}
 	}
 
 	return err
@@ -154,7 +145,7 @@ func Handler() error {
 		return err
 	}
 
-	err = refreshProjDynamo(sess, res.Body)
+	err = refreshProjDynamo(res.Body)
 	if err != nil {
 		return err
 	}

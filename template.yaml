@@ -10,11 +10,11 @@ Globals:
     Timeout: 5
 
 Resources:
-  FetchLinesFunction:
+  UpdateLinesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: cmd/lambda/fetch-lines
-      Handler: fetch-lines
+      CodeUri: cmd/lambda/update-lines
+      Handler: main
       Runtime: go1.x
       Tracing: Active
       Policies: arn:aws:iam::261392311630:policy/DynamoDBReadWriteGameOdds
@@ -74,7 +74,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: cmd/lambda/update-nfl-elo
-      Handler: update-nfl-elo
+      Handler: main
       Runtime: go1.x
       Tracing: Active
       Policies:
@@ -87,11 +87,11 @@ Resources:
             Enabled: True
             Schedule: 'cron(0 10 * * ? *)'
 
-  CompileExportFunction:
+  FetchLinesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: cmd/lambda/compile-export
-      Handler: compile-export
+      CodeUri: cmd/lambda/fetch-lines
+      Handler: main
       Runtime: go1.x
       Tracing: Active
       Policies: arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
@@ -103,6 +103,40 @@ Resources:
             Method: get
             RestApiId:
               Ref: APIEndpoint
+
+  FetchProjectionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cmd/lambda/fetch-projections
+      Handler: main
+      Runtime: go1.x
+      Tracing: Active
+      Policies: arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /game-projections
+            Method: get
+            RestApiId:
+              Ref: APIEndpoint
+
+  #FetchProjectionsFunction:
+    #Type: AWS::Serverless::Function
+    #Properties:
+      #CodeUri: cmd/lambda/fetch-projections
+      #Handler: main
+      #Runtime: go1.x
+      #Tracing: Active
+      #Policies: arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+      #Events:
+        #ApiEvent:
+          #Type: Api
+          #Properties:
+            #Path: /game-lines
+            #Method: get
+            #RestApiId:
+              #Ref: APIEndpoint
 
   APIEndpoint:
     Type: AWS::Serverless::Api
@@ -132,7 +166,7 @@ Resources:
   WinProjectionsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: win-projections
+      TableName: game-projections
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         -
@@ -141,39 +175,25 @@ Resources:
         -
           AttributeName: source
           AttributeType: S
+        -
+          AttributeName: gameDate
+          AttributeType: S
       KeySchema:
         -
           AttributeName: gameId
           KeyType: HASH
+        -
+          AttributeName: gameDate
+          KeyType: RANGE
       GlobalSecondaryIndexes:
         -
-          IndexName: source
+          IndexName: ByDate
           KeySchema:
             -
               AttributeName: source
               KeyType: HASH
+            -
+              AttributeName: gameDate
+              KeyType: RANGE
           Projection:
             ProjectionType: ALL
-
-
-Outputs:
-  FetchLinesFunction:
-    Description: "Scrape the betting lines and store in dynamo table"
-    Value: !GetAtt FetchLinesFunction.Arn
-  FetchLinesFuctionIamRole:
-    Description: "Implicit IAM Role created for fetch lines function"
-    Value: !GetAtt FetchLinesFunctionRole.Arn
-
-  UpdateNFLEloFunction:
-    Description: "Pull latest 538 NFL ELO data and store them in S3/Dynamo"
-    Value: !GetAtt UpdateNFLEloFunction.Arn
-  UpdateNFLEloFuctionIamRole:
-    Description: "Implicit IAM Role created for update NFL ELO function"
-    Value: !GetAtt UpdateNFLEloFunctionRole.Arn
-
-  CompileExportFunction:
-    Description: "Compile odds-win% export and return via api"
-    Value: !GetAtt CompileExportFunction.Arn
-  CompileExportFunctionRole:
-    Description: "Implicit IAM Role created for compile export function"
-    Value: !GetAtt CompileExportFunctionRole.Arn
