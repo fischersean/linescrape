@@ -140,6 +140,9 @@ Resources:
 
   APIEndpoint:
     Type: AWS::Serverless::Api
+    DefinitionUri:
+      Bucket: linescape-api
+      Key: LineScrapeAPIv1.yaml
     Properties:
       StageName: v0
 

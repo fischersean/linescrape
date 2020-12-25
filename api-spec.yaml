@@ -1,12 +1,12 @@
----
-swagger: "2.0"
+openapi: "3.0.1"
 info:
-  version: "1.0"
   title: "LineScrape"
-host: "api.seanfischer.io"
-basePath: "/v0"
-schemes:
-- "https"
+  version: "1.0"
+servers:
+- url: "https://api.seanfischer.io/{basePath}"
+  variables:
+    basePath:
+      default: "/v0"
 paths:
   /game-lines:
     get:
@@ -16,32 +16,81 @@ paths:
         description: "The sport league to pull lines for. Currently there are 4 leagues\
           \ supported, NFL, NBA, college-football, and college-basketball."
         required: true
-        type: "string"
+        schema:
+          type: "string"
       - name: "source"
         in: "query"
         description: "The sports book to pull lines from. mybookie.ag (mybookie) and\
           \ Caesars (caesars) are supported."
         required: true
-        type: "string"
-      responses: {}
+        schema:
+          type: "string"
       security:
       - api_key: []
+      x-amazon-apigateway-request-validator: "Validate query string parameters and\
+        \ headers"
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:261392311630:function:LineScrape-FetchLinesFunction-1W96YNK173HR/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        type: "aws_proxy"
   /game-projections:
     get:
       parameters:
       - name: "gameDate"
         in: "query"
         required: true
-        type: "string"
+        schema:
+          type: "string"
       - name: "source"
         in: "query"
         required: true
-        type: "string"
-      responses: {}
+        schema:
+          type: "string"
       security:
       - api_key: []
-securityDefinitions:
-  api_key:
-    type: "apiKey"
-    name: "x-api-key"
-    in: "header"
+      x-amazon-apigateway-request-validator: "Validate query string parameters and\
+        \ headers"
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:261392311630:function:LineScrape-FetchProjectionsFunction-UF2F24IVN1FN/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        type: "aws_proxy"
+components:
+  securitySchemes:
+    api_key:
+      type: "apiKey"
+      name: "x-api-key"
+      in: "header"
+x-amazon-apigateway-documentation:
+  version: "0.1"
+  createdDate: "2020-12-23T22:12:52Z"
+  documentationParts:
+  - location:
+      type: "QUERY_PARAMETER"
+      path: "/game-lines"
+      method: "GET"
+      name: "league"
+    properties:
+      description: "The sport league to pull lines for. Currently there are 4 leagues\
+        \ supported, NFL, NBA, college-football, and college-basketball."
+  - location:
+      type: "QUERY_PARAMETER"
+      path: "/game-lines"
+      method: "GET"
+      name: "projection"
+    properties:
+      description: "The source of win projections. Currently only 538's NFL ELO system\
+        \ is supported (FTEQBELO)"
+  - location:
+      type: "QUERY_PARAMETER"
+      path: "/game-lines"
+      method: "GET"
+      name: "source"
+    properties:
+      description: "The sports book to pull lines from. mybookie.ag (mybookie) and\
+        \ Caesars (caesars) are supported."
+x-amazon-apigateway-request-validators:
+  Validate query string parameters and headers:
+    validateRequestParameters: true
+    validateRequestBody: false
