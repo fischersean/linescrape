@@ -1,11 +1,11 @@
 package fte
 
-import (
-	"fmt"
-	"strings"
+var (
+	NflLatestUrl  = "https://projects.fivethirtyeight.com/nfl-api/nfl_elo_latest.csv"
+	NflHistoryUrl = "https://projects.fivethirtyeight.com/nfl-api/nfl_elo.csv"
 )
 
-type EloProjection struct {
+type NflEloProjection struct {
 	Date         string  `csv:"date"`
 	Season       int     `csv:"season"`
 	Neutral      int     `csv:"neutral"`
@@ -38,16 +38,7 @@ type EloProjection struct {
 	Score2       float64 `csv:"score2"`
 }
 
-func GenGameID(p EloProjection) string {
-	parts := strings.Split(p.Date, "-")
-	return fmt.Sprintf("%s%s%s%s%s%s",
-		"NFL",
-		parts[0], parts[1], parts[2],
-		p.Team1, p.Team2,
-	)
-}
-
-var ToCommon = map[string]string{
+var ToCommonNflName = map[string]string{
 	"ARI": "Arizona Cardinals",
 	"ATL": "Atlanta Falcons",
 	"BAL": "Baltimore Ravens",
@@ -82,7 +73,7 @@ var ToCommon = map[string]string{
 	"WSH": "Washington Football Team",
 }
 
-var FromCommon = map[string]string{
+var FromCommonNflName = map[string]string{
 	"Arizona Cardinals":        "ARI",
 	"Atlanta Falcons":          "ATL",
 	"Baltimore Ravens":         "BAL",

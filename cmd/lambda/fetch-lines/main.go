@@ -15,8 +15,8 @@ import (
 )
 
 type Request struct {
-	League     string `json:"league"`
-	Source     string `json:"source"`
+	League string `json:"league"`
+	Source string `json:"source"`
 }
 
 var (
@@ -31,7 +31,6 @@ var (
 		"mybookie": true,
 		"caesars":  true,
 	}
-
 )
 
 func validateRequest(r Request) error {

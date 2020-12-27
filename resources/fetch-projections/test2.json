@@ -1,0 +1,12 @@
+{
+    "QueryStringParameters": {
+        "source": "FTERAPTORELO"
+    },
+    "MultiValueQueryStringParameters": {
+        "gameDate": [
+             "2020-12-31T00:00:00Z",
+             "2020-12-30T00:00:00Z"
+        ]
+    }
+}
+

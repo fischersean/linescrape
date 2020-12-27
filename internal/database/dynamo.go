@@ -11,8 +11,7 @@ import (
 
 	"errors"
 	"fmt"
-	//"log"
-	"strings"
+	"log"
 	"time"
 )
 
@@ -87,57 +86,12 @@ func FetchLatestOdds(dataSource string, league string) ([]game.Line, error) {
 
 }
 
-// FetchLatestNflOdds returns the most recently added set of game odds
-func FetchLatestNflOdds(dataSource string) ([]game.Line, error) {
-
-	var odds []game.Line
-
-	tableName := "game-odds"
-	league := "nfl"
-
-	input := &dynamodb.QueryInput{
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":v1": {
-				S: aws.String(league),
-			},
-			":v2": {
-				S: aws.String(dataSource),
-			},
-		},
-		ExpressionAttributeNames: map[string]*string{
-			"#S": aws.String("source"),
-		},
-		KeyConditionExpression: aws.String("league = :v1"),
-		FilterExpression:       aws.String("#S = :v2"),
-		TableName:              aws.String(tableName),
-		ScanIndexForward:       aws.Bool(false),
-		Limit:                  aws.Int64(1),
-	}
-
-	result, err := Service.Query(input)
-
-	if err != nil {
-		return odds, err
-	}
-
-	if *result.Count != 1 {
-		return odds, errors.New("Could not find item matching query expression")
-	}
-
-	item := []GameOddsItem{}
-	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &item)
-
-	return item[0].Odds, err
-
-}
-
 // FetchProjection returns the projection matching the given game info and source
 func FetchProjectionV2(gameDate time.Time, source string) ([]game.Projection, error) {
 
 	var p []game.Projection
 
-	//log.Printf("%s", gid)
-	tableName := "game-projections"
+	tableName := "win-projections"
 	indexName := "ByDate"
 
 	input := &dynamodb.QueryInput{
@@ -165,11 +119,14 @@ func FetchProjectionV2(gameDate time.Time, source string) ([]game.Projection, er
 	}
 
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &p)
+	log.Printf("%#v", p)
 
 	// Rename to common
 	var nameMap map[string]string
 	if source == "FTEQBELO" {
-		nameMap = fte.ToCommon
+		nameMap = fte.ToCommonNflName
+	} else if source == "FTERAPTORELO"{
+		nameMap = fte.ToCommonNbaName
 	} else {
 		// we will just return early and not rename the items
 		return p, nil
@@ -185,79 +142,9 @@ func FetchProjectionV2(gameDate time.Time, source string) ([]game.Projection, er
 
 }
 
-// FetchProjection returns the projection matching the given game info and source
-func FetchProjection(odds game.Line, projectionSource string) (game.Projection, error) {
-
-	var p game.Projection
-
-	gameDate, err := time.Parse("2006-01-02 15:04:05", odds.GameTime)
-	if err != nil {
-		// Try the caesars format
-		parts := strings.Split(odds.GameTime, " ")
-		gameDate, err = time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s %s", parts[0], parts[1]))
-
-		if err != nil {
-			return p, err
-
-		}
-	}
-
-	var nameMap map[string]string
-
-	if projectionSource == "FTEQBELO" {
-		nameMap = fte.FromCommon
-	} else {
-		return p, errors.New(fmt.Sprintf("Projection source not supported: %s", projectionSource))
-	}
-
-	gid := fmt.Sprintf("%s%s%s%s",
-		"NFL",
-		gameDate.Format("20060102"),
-		nameMap[odds.HomeTeam],
-		nameMap[odds.VisitingTeam],
-	)
-
-	//log.Printf("%s", gid)
-	tableName := "game-projections"
-
-	input := &dynamodb.QueryInput{
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":v1": {
-				S: aws.String(gid),
-			},
-			":v2": {
-				S: aws.String(projectionSource),
-			},
-		},
-		ExpressionAttributeNames: map[string]*string{
-			"#S": aws.String("source"),
-		},
-		KeyConditionExpression: aws.String("gameId = :v1"),
-		FilterExpression:       aws.String("#S = :v2"),
-		TableName:              aws.String(tableName),
-		Limit:                  aws.Int64(1),
-	}
-
-	result, err := Service.Query(input)
-
-	if err != nil {
-		return p, err
-	}
-
-	if *result.Count != 1 {
-		//log.Printf("Error finding projections for %s", gid)
-		return p, errors.New("Could not find item matching query expression")
-	}
-
-	err = dynamodbattribute.UnmarshalMap(result.Items[0], &p)
-
-	return p, err
-
-}
-
 func PutGameProjection(p game.Projection) error {
 
-	tableName := "game-projections"
+	tableName := "win-projections"
 
 	av, err := dynamodbattribute.MarshalMap(p)
 	if err != nil {

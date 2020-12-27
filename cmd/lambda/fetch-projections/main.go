@@ -11,7 +11,7 @@ import (
 	"encoding/json"
 	//"errors"
 	//"fmt"
-	//"log"
+	"log"
 	"time"
 )
 
@@ -76,6 +76,7 @@ func generateExport(source string, gameDates []time.Time) (projs []game.Projecti
 		if err != nil && err.Error() != "Could not find item matching query expression" {
 			return projs, err
 		}
+		log.Printf("%#v", proj)
 
 		projs = append(projs, proj...)
 	}
