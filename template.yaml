@@ -52,7 +52,7 @@ Resources:
         MybookieNFL:
           Type: Schedule
           Properties:
-            Enabled: True
+            Enabled: False
             Schedule: 'rate(5 minutes)'
             Input: '{"Source": "mybookie", "League":"NFL"}'
         CaesarsCFB:
@@ -64,7 +64,7 @@ Resources:
         CaesarsNFL:
           Type: Schedule
           Properties:
-            Enabled: True
+            Enabled: False
             Schedule: 'rate(5 minutes)'
             Input: '{"Source": "caesars", "League":"NFL"}'
 
