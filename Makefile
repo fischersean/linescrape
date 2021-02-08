@@ -23,7 +23,7 @@ lint:
 	@golangci-lint run
 
 build:
-	@sam build
+	@CGO_ENABLED=0 sam build
 
 deploy:
 	@sam deploy

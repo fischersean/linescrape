@@ -17,6 +17,7 @@ Resources:
       Tracing: Active
       Policies: arn:aws:iam::261392311630:policy/DynamoDBReadWriteGameOdds
       Events:
+
         # BASKETBALL -----------------------------------------------
         MybookieNCAAB:
           Type: Schedule
@@ -42,6 +43,7 @@ Resources:
             Enabled: True
             Schedule: 'rate(5 minutes)'
             Input: '{"Source": "caesars", "League":"NBA"}'
+
         # FOOTBALL -----------------------------------------------
         MybookieCFB:
           Type: Schedule

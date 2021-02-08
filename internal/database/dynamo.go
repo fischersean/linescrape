@@ -125,7 +125,7 @@ func FetchProjectionV2(gameDate time.Time, source string) ([]game.Projection, er
 	var nameMap map[string]string
 	if source == "FTEQBELO" {
 		nameMap = fte.ToCommonNflName
-	} else if source == "FTERAPTORELO"{
+	} else if source == "FTERAPTORELO" {
 		nameMap = fte.ToCommonNbaName
 	} else {
 		// we will just return early and not rename the items
