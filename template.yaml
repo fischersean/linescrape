@@ -70,6 +70,20 @@ Resources:
             Schedule: 'rate(5 minutes)'
             Input: '{"Source": "caesars", "League":"NFL"}'
 
+        # BASEBALL -----------------------------------------------
+        MybookieMLB:
+          Type: Schedule
+          Properties:
+            Enabled: True
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "mybookie", "League":"mlb"}'
+        CaesarsMLB:
+          Type: Schedule
+          Properties:
+            Enabled: True
+            Schedule: 'rate(5 minutes)'
+            Input: '{"Source": "caesars", "League":"mlb"}'
+
   UpdateEloFunction:
     Type: AWS::Serverless::Function
     Properties:
