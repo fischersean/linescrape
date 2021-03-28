@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"strconv"
 	"time"
-	//"log"
 )
 
 var (
@@ -22,6 +21,7 @@ var (
 		"NBA":                "77",
 		"college-basketball": "81",
 		"ALL-BASKETBALL":     "19",
+		"MLB":                "62",
 	}
 
 	SupportedLeagues = []string{
@@ -29,11 +29,13 @@ var (
 		"college-football",
 		"NBA",
 		"college-basketball",
+		"MLB",
 	}
 
 	SupportedSports = map[string]string{
 		"Football":   "",
 		"Basketball": "",
+		"Baseball":   "",
 	}
 )
 

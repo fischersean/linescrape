@@ -16,11 +16,13 @@ var (
 		"college-football",
 		"NBA",
 		"college-basketball",
+		"MLB",
 	}
 
 	SupportedSports = map[string]string{
 		"Football":   "",
 		"Basketball": "",
+		"Baseball":   "",
 	}
 )
 
@@ -28,6 +30,7 @@ func FetchLines(league string) ([]game.Line, error) {
 	requestNames := map[string]string{
 		"NFL":                "nfl",
 		"NBA":                "nba",
+		"MLB":                "",
 		"college-football":   "college-football",
 		"college-basketball": "ncaa-basketball",
 	}
